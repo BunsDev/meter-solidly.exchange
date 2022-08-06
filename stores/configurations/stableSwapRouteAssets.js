@@ -1,45 +1,59 @@
 // list of assets we support for providing liquidity to the factory. We will have to expand on this.
-export default [{
-  address: '0x4cb6cEf87d8cADf966B455E8BD58ffF32aBA49D1',
-  name: 'Meter Stable',
-  symbol: 'MTR',
-  decimals: 18,
-  logoURI: 'https://raw.githubusercontent.com/meterio/token-list/master/data/MTR/logo.png'
-},
-{
-  address: '0x8A419EF4941355476CF04933E90BF3BBF2F73814',
-  name: 'Meter Governance',
-  symbol: 'MTRG',
-  decimals: 18,
-  logoURI: 'https://raw.githubusercontent.com/meterio/token-list/master/data/MTRG/logo.png'
-},
-{
-  address: '0x3e5a2a4812d319ded22479a88ed708c6b55ca0b1',
-  name: 'Meter USDT',
-  symbol: 'mUSDT',
-  decimals: 6,
-  logoURI: 'https://raw.githubusercontent.com/meterio/token-list/master/data/USDT/logo.png'
-},
-{
-  address: '0x1B80E7dA342981314f4032434fE0def21B90Ec20',
-  name: 'DAI',
-  symbol: 'DAI',
-  decimals: 18,
-  logoURI: 'https://raw.githubusercontent.com/meterio/token-list/master/data/DAI/logo.png'
-},
-{
-  address: '0xb0D0410D3D158a9b38c36e5aAB80264BC5272a20',
-  name: 'BUSD',
-  symbol: 'BUSD',
-  decimals: 18,
-  logoURI: 'https://raw.githubusercontent.com/meterio/token-list/master/data/BUSD/logo.png'
-},
-{
-  address: '0x4e5c590D2fa8Aa3bC85342690eCfc33cF1c27eBB',
-  name: 'USDC',
-  symbol: 'USDC',
-  decimals: 6,
-  logoURI: 'https://raw.githubusercontent.com/meterio/token-list/master/data/USDC/logo.png'
-}
-
+export default [
+  {
+    address: '0x8A419EF4941355476CF04933E90BF3BBF2F73814',
+    name: 'Meter Governance',
+    symbol: 'MTRG',
+    decimals: 18,
+    logoURI: 'https://raw.githubusercontent.com/meterio/token-list/master/data/MTRG/logo.png'
+  },
+  {
+    address: '0xe8876830e7cc85dae8ce31b0802313caf856886f',
+    name: 'ETH',
+    symbol: 'ETH',
+    decimals: 18,
+    logoURI: 'https://raw.githubusercontent.com/meterio/token-list/master/data/ETH/logo.png'
+  },
+  {
+    address: '0x90cd3092f2104bb09ddb777805a34a3dbd951178',
+    name: 'WBTC',
+    symbol: 'WBTC',
+    decimals: 18,
+    logoURI: 'https://raw.githubusercontent.com/meterio/token-list/master/data/WBTC/logo.png'
+  },
+  {
+    address: '0xda5f90e416a22f6f65ed586a859c8666ce6ce1d1',
+    name: 'USDT',
+    symbol: 'USDT',
+    decimals: 18,
+    logoURI: 'https://raw.githubusercontent.com/meterio/token-list/master/data/USDT/logo.png'
+  },
+  {
+    address: '0x8ae4c669f147737085a23d578c1da94d3e39879f',
+    name: 'USDC',
+    symbol: 'USDC',
+    decimals: 18,
+    logoURI: 'https://raw.githubusercontent.com/meterio/token-list/master/data/USDC/logo.png'
+  },
+  {
+    address: '0x37d982D96AC985a4Fa9522383De5010109F0627C',
+    name: 'suUSD',
+    symbol: 'suUSD',
+    decimals: 18,
+    logoURI: ''
+  },
+  {
+    address: '0x4b0D849E5BF7f62bcBb0B7C364DDDA552c2c3a8a',
+    name: 'suETH',
+    symbol: 'suETH',
+    decimals: 18,
+    logoURI: ''
+  },
+  {
+    address: '0x0477763b021E0f30680b7266a264d1044FE77A4d',
+    name: 'suBTC',
+    symbol: 'suBTC',
+    decimals: 18,
+    logoURI: ''
+  }
 ]

@@ -30,7 +30,7 @@ export default function ssWhitelist() {
 
   useEffect(() => {
     const searchReturned = async (res) => {
-      setToken(res)
+      setToken({ ...res })
       setLoading(false)
     }
 
@@ -47,6 +47,8 @@ export default function ssWhitelist() {
         setNFT(nfts[0])
       }
     }
+
+    ssUpdated()
 
     const accountChanged = async () => {
       const w3 = await stores.accountStore.getWeb3Provider()

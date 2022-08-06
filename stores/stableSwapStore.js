@@ -59,6 +59,9 @@ class Store {
             break
 
           // LIQUIDITY
+          case ACTIONS.CREATE_PAIR:
+            this.createPair(payload)
+            break
           case ACTIONS.CREATE_PAIR_AND_STAKE:
             this.createPairStake(payload)
             break
@@ -317,7 +320,7 @@ class Store {
     }
   }
 
-  getPairByAddress = async (pairAddress) => {
+  getPairByAddress = async (pairAddress, update) => {
     try {
       const web3 = await stores.accountStore.getWeb3Provider()
       if (!web3) {
@@ -335,7 +338,7 @@ class Store {
         return (pair.address.toLowerCase() == pairAddress.toLowerCase())
       })
 
-      if(thePair.length > 0) {
+      if(!update && thePair.length > 0) {
         const pc = new web3.eth.Contract(CONTRACTS.PAIR_ABI, pairAddress)
 
         const [ totalSupply, reserve0, reserve1, balanceOf ] = await Promise.all([
@@ -459,9 +462,13 @@ class Store {
         }
       }
 
-      pairs.push(thePair)
+      if (update && thePair.length > 0) {
+        const index = pairs.findIndex(p => p.address.toLowerCase() == pairAddress.toLowerCase())
+        pairs.splice(index, 1, thePair)
+      } else {
+        pairs.push(thePair)
+      }
       this.setStore({ pairs: pairs })
-
       return thePair
     } catch(ex) {
       console.log(ex)
@@ -471,12 +478,6 @@ class Store {
 
   getPair = async (addressA, addressB, stab) => {
     try {
-      if(addressA === 'FTM') {
-        addressA = CONTRACTS.WFTM_ADDRESS
-      }
-      if(addressB === 'FTM') {
-        addressB = CONTRACTS.WFTM_ADDRESS
-      }
 
       const web3 = await stores.accountStore.getWeb3Provider()
       if (!web3) {
@@ -512,6 +513,13 @@ class Store {
         returnPair.reserve1 = BigNumber(reserve1).div(10**returnPair.token1.decimals).toFixed(parseInt(returnPair.token1.decimals))
 
         return returnPair
+      }
+
+      if(addressA === 'ETH') {
+        addressA = CONTRACTS.WETH_ADDRESS
+      }
+      if(addressB === 'ETH') {
+        addressB = CONTRACTS.WETH_ADDRESS
       }
 
       const factoryContract = new web3.eth.Contract(CONTRACTS.FACTORY_ABI, CONTRACTS.FACTORY_ADDRESS)
@@ -684,6 +692,9 @@ class Store {
       const baseAssets = this.getStore('baseAssets')
 
       const theBaseAsset = baseAssets.filter((as) => {
+        if (as.address === 'ETH') {
+          return CONTRACTS.WETH_ADDRESS.toLowerCase() === address.toLowerCase() || as.address.toLowerCase() === address.toLowerCase()
+        }
         return as.address.toLowerCase() === address.toLowerCase()
       })
       if(theBaseAsset.length > 0) {
@@ -749,6 +760,9 @@ class Store {
   }
 
   _getBaseAssetDetails = async (web3, multicall, address, getBalance, account) => {
+    if (address === 'ETH') {
+      address = CONTRACTS.ETH_ADDRESS
+    }
     try {
       const baseAssetContract = new web3.eth.Contract(CONTRACTS.ERC20_ABI, address)
       const calls = [
@@ -1058,7 +1072,6 @@ class Store {
       ])
      
       
-
       const ps = await Promise.all(
         pairs.map(async (pair) => {
           try {
@@ -1256,7 +1269,7 @@ class Store {
   _getBalanceOfs = async (web3, multicall, baseAssets, account) => {
     try {
       const balanceOfCalls = baseAssets.map((asset) => {
-        if(asset.address === 'FTM') {
+        if(asset.address === 'ETH') {
           return multicall.getEthBalance(account.address)
         }
 
@@ -1293,8 +1306,8 @@ class Store {
 
       const whitelistedCalls = baseAssets.map((asset) => {
         let addy = asset.address
-        if(asset.address === 'FTM') {
-          addy = CONTRACTS.WFTM_ADDRESS
+        if(asset.address === 'ETH') {
+          addy = CONTRACTS.WETH_ADDRESS
         }
 
         return voterContract.methods.isWhitelisted(addy)
@@ -1374,11 +1387,11 @@ class Store {
 
       let toki0 = token0.address
       let toki1 = token1.address
-      if(token0.address === 'FTM') {
-        toki0 = CONTRACTS.WFTM_ADDRESS
+      if(token0.address === 'ETH') {
+        toki0 = CONTRACTS.WETH_ADDRESS
       }
-      if(token1.address === 'FTM') {
-        toki1 = CONTRACTS.WFTM_ADDRESS
+      if(token1.address === 'ETH') {
+        toki1 = CONTRACTS.WETH_ADDRESS
       }
 
       const factoryContract = new web3.eth.Contract(CONTRACTS.FACTORY_ABI, CONTRACTS.FACTORY_ADDRESS)
@@ -1437,7 +1450,7 @@ class Store {
       let allowance1 = 0
 
       // CHECK ALLOWANCES AND SET TX DISPLAY
-      if(token0.address !== 'FTM') {
+      if(token0.address !== 'ETH') {
         console.log('token0 ', token0)
         allowance0 = await this._getDepositAllowance(web3, token0, account)
         if(BigNumber(allowance0).lt(amount0)) {
@@ -1461,7 +1474,7 @@ class Store {
         })
       }
 
-      if(token1.address !== 'FTM') {
+      if(token1.address !== 'ETH') {
         allowance1 = await this._getDepositAllowance(web3, token1, account)
         if(BigNumber(allowance1).lt(amount1)) {
           this.emitter.emit(ACTIONS.TX_STATUS, {
@@ -1541,13 +1554,13 @@ class Store {
       let params = [token0.address, token1.address, isStable, sendAmount0, sendAmount1, sendAmount0Min, sendAmount1Min, account.address, deadline]
       let sendValue = null
 
-      if(token0.address === 'FTM') {
-        func = 'addLiquidityFTM'
+      if(token0.address === 'ETH') {
+        func = 'addLiquidityETH'
         params = [token1.address, isStable, sendAmount1, sendAmount1Min, sendAmount0Min, account.address, deadline]
         sendValue = sendAmount0
       }
-      if(token1.address === 'FTM') {
-        func = 'addLiquidityFTM'
+      if(token1.address === 'ETH') {
+        func = 'addLiquidityETH'
         params = [token0.address, isStable, sendAmount0, sendAmount0Min, sendAmount1Min, account.address, deadline]
         sendValue = sendAmount1
       }
@@ -1561,11 +1574,11 @@ class Store {
         // GET PAIR FOR NEWLY CREATED LIQUIDITY POOL
         let tok0 = token0.address
         let tok1 = token1.address
-        if(token0.address === 'FTM') {
-          tok0 = CONTRACTS.WFTM_ADDRESS
+        if(token0.address === 'ETH') {
+          tok0 = CONTRACTS.WETH_ADDRESS
         }
-        if(token1.address === 'FTM') {
-          tok1 = CONTRACTS.WFTM_ADDRESS
+        if(token1.address === 'ETH') {
+          tok1 = CONTRACTS.WETH_ADDRESS
         }
         const pairFor = await factoryContract.methods.getPair(tok0, tok1, isStable).call()
 
@@ -1641,7 +1654,7 @@ class Store {
     }
   }
 
-  createPairDeposit = async (payload) => {
+  createPair = async (payload) => {
     try {
       const context = this
 
@@ -1661,11 +1674,11 @@ class Store {
 
       let toki0 = token0.address
       let toki1 = token1.address
-      if(token0.address === 'FTM') {
-        toki0 = CONTRACTS.WFTM_ADDRESS
+      if(token0.address === 'ETH') {
+        toki0 = CONTRACTS.WETH_ADDRESS
       }
-      if(token1.address === 'FTM') {
-        toki1 = CONTRACTS.WFTM_ADDRESS
+      if(token1.address === 'ETH') {
+        toki1 = CONTRACTS.WETH_ADDRESS
       }
 
 
@@ -1701,11 +1714,6 @@ class Store {
           uuid: depositTXID,
           description: `Create liquidity pool`,
           status: 'WAITING'
-        },
-        {
-          uuid: createGaugeTXID,
-          description: `Create gauge`,
-          status: 'WAITING'
         }
       ]})
 
@@ -1713,7 +1721,7 @@ class Store {
       let allowance1 = 0
 
       // CHECK ALLOWANCES AND SET TX DISPLAY
-      if(token0.address !== 'FTM') {
+      if(token0.address !== 'ETH') {
         allowance0 = await this._getDepositAllowance(web3, token0, account)
         if(BigNumber(allowance0).lt(amount0)) {
           this.emitter.emit(ACTIONS.TX_STATUS, {
@@ -1736,7 +1744,7 @@ class Store {
         })
       }
 
-      if(token1.address !== 'FTM') {
+      if(token1.address !== 'ETH') {
         allowance1 = await this._getDepositAllowance(web3, token1, account)
         if(BigNumber(allowance1).lt(amount1)) {
           this.emitter.emit(ACTIONS.TX_STATUS, {
@@ -1816,13 +1824,13 @@ class Store {
       let params = [token0.address, token1.address, isStable, sendAmount0, sendAmount1, sendAmount0Min, sendAmount1Min, account.address, deadline]
       let sendValue = null
 
-      if(token0.address === 'FTM') {
-        func = 'addLiquidityFTM'
+      if(token0.address === 'ETH') {
+        func = 'addLiquidityETH'
         params = [token1.address, isStable, sendAmount1, sendAmount1Min, sendAmount0Min, account.address, deadline]
         sendValue = sendAmount0
       }
-      if(token1.address === 'FTM') {
-        func = 'addLiquidityFTM'
+      if(token1.address === 'ETH') {
+        func = 'addLiquidityETH'
         params = [token0.address, isStable, sendAmount0, sendAmount0Min, sendAmount1Min, account.address, deadline]
         sendValue = sendAmount1
       }
@@ -1836,11 +1844,224 @@ class Store {
         // GET PAIR FOR NEWLY CREATED LIQUIDITY POOL
         let tok0 = token0.address
         let tok1 = token1.address
-        if(token0.address === 'FTM') {
-          tok0 = CONTRACTS.WFTM_ADDRESS
+        if(token0.address === 'ETH') {
+          tok0 = CONTRACTS.WETH_ADDRESS
         }
-        if(token1.address === 'FTM') {
-          tok1 = CONTRACTS.WFTM_ADDRESS
+        if(token1.address === 'ETH') {
+          tok1 = CONTRACTS.WETH_ADDRESS
+        }
+        const pairFor = await factoryContract.methods.getPair(tok0, tok1, isStable).call()
+
+        await context.updatePairsCall(web3, account, pairFor)
+
+        this.emitter.emit(ACTIONS.PAIR_CREATED, pairFor)
+      }, null, sendValue)
+    } catch(ex) {
+      console.error(ex)
+      this.emitter.emit(ACTIONS.ERROR, ex)
+    }
+  }
+
+  createPairDeposit = async (payload) => {
+    try {
+      const context = this
+
+      const account = stores.accountStore.getStore("account")
+      if (!account) {
+        console.warn('account not found')
+        return null
+      }
+
+      const web3 = await stores.accountStore.getWeb3Provider()
+      if (!web3) {
+        console.warn('web3 not found')
+        return null
+      }
+
+      const { token0, token1, amount0, amount1, isStable, slippage } = payload.content
+
+      let toki0 = token0.address
+      let toki1 = token1.address
+      if(token0.address === 'ETH') {
+        toki0 = CONTRACTS.WETH_ADDRESS
+      }
+      if(token1.address === 'ETH') {
+        toki1 = CONTRACTS.WETH_ADDRESS
+      }
+
+
+      const factoryContract = new web3.eth.Contract(CONTRACTS.FACTORY_ABI, CONTRACTS.FACTORY_ADDRESS)
+      const pairFor = await factoryContract.methods.getPair(toki0, toki1, isStable).call()
+
+      if(pairFor && pairFor != ZERO_ADDRESS) {
+        await context.updatePairsCall(web3, account)
+        this.emitter.emit(ACTIONS.ERROR, 'Pair already exists')
+        return null
+      }
+
+      // ADD TRNASCTIONS TO TRANSACTION QUEUE DISPLAY
+      let allowance0TXID = this.getTXUUID()
+      let allowance1TXID = this.getTXUUID()
+      let depositTXID = this.getTXUUID()
+      let createGaugeTXID = this.getTXUUID()
+
+      //DOD A CHECK FOR IF THE POOL ALREADY EXISTS
+
+      this.emitter.emit(ACTIONS.TX_ADDED, { title: `Create liquidity pool for ${token0.symbol}/${token1.symbol}`, type: 'Liquidity', verb: 'Liquidity Pool Created', transactions: [
+        {
+          uuid: allowance0TXID,
+          description: `Checking your ${token0.symbol} allowance`,
+          status: 'WAITING'
+        },
+        {
+          uuid: allowance1TXID,
+          description: `Checking your ${token1.symbol} allowance`,
+          status: 'WAITING'
+        },
+        {
+          uuid: depositTXID,
+          description: `Create liquidity pool`,
+          status: 'WAITING'
+        },
+        {
+          uuid: createGaugeTXID,
+          description: `Create gauge`,
+          status: 'WAITING'
+        }
+      ]})
+
+      let allowance0 = 0
+      let allowance1 = 0
+
+      // CHECK ALLOWANCES AND SET TX DISPLAY
+      if(token0.address !== 'ETH') {
+        allowance0 = await this._getDepositAllowance(web3, token0, account)
+        if(BigNumber(allowance0).lt(amount0)) {
+          this.emitter.emit(ACTIONS.TX_STATUS, {
+            uuid: allowance0TXID,
+            description: `Allow the router to spend your ${token0.symbol}`
+          })
+        } else {
+          this.emitter.emit(ACTIONS.TX_STATUS, {
+            uuid: allowance0TXID,
+            description: `Allowance on ${token0.symbol} sufficient`,
+            status: 'DONE'
+          })
+        }
+      } else {
+        allowance0 = MAX_UINT256
+        this.emitter.emit(ACTIONS.TX_STATUS, {
+          uuid: allowance0TXID,
+          description: `Allowance on ${token0.symbol} sufficient`,
+          status: 'DONE'
+        })
+      }
+
+      if(token1.address !== 'ETH') {
+        allowance1 = await this._getDepositAllowance(web3, token1, account)
+        if(BigNumber(allowance1).lt(amount1)) {
+          this.emitter.emit(ACTIONS.TX_STATUS, {
+            uuid: allowance1TXID,
+            description: `Allow the router to spend your ${token1.symbol}`
+          })
+        } else {
+          this.emitter.emit(ACTIONS.TX_STATUS, {
+            uuid: allowance1TXID,
+            description: `Allowance on ${token1.symbol} sufficient`,
+            status: 'DONE'
+          })
+        }
+      } else {
+        allowance1 = MAX_UINT256
+        this.emitter.emit(ACTIONS.TX_STATUS, {
+          uuid: allowance1TXID,
+          description: `Allowance on ${token1.symbol} sufficient`,
+          status: 'DONE'
+        })
+      }
+
+      const gasPrice = await stores.accountStore.getGasPrice()
+
+      const allowanceCallsPromises = []
+
+
+      // SUBMIT REQUIRED ALLOWANCE TRANSACTIONS
+      if(BigNumber(allowance0).lt(amount0)) {
+        const tokenContract = new web3.eth.Contract(CONTRACTS.ERC20_ABI, token0.address)
+
+        const tokenPromise = new Promise((resolve, reject) => {
+          context._callContractWait(web3, tokenContract, 'approve', [CONTRACTS.ROUTER_ADDRESS, MAX_UINT256], account, gasPrice, null, null, allowance0TXID, (err) => {
+            if (err) {
+              reject(err)
+              return
+            }
+
+            resolve()
+          })
+        })
+
+        allowanceCallsPromises.push(tokenPromise)
+      }
+
+
+      if(BigNumber(allowance1).lt(amount1)) {
+        const tokenContract = new web3.eth.Contract(CONTRACTS.ERC20_ABI, token1.address)
+        console.log(token1.address,  CONTRACTS.ROUTER_ADDRESS, account)
+        const tokenPromise = new Promise((resolve, reject) => {
+          context._callContractWait(web3, tokenContract, 'approve', [CONTRACTS.ROUTER_ADDRESS, MAX_UINT256], account, gasPrice, null, null, allowance1TXID, (err) => {
+            if (err) {
+              reject(err)
+              return
+            }
+
+            resolve()
+          })
+        })
+
+        allowanceCallsPromises.push(tokenPromise)
+      }
+
+      const done = await Promise.all(allowanceCallsPromises)
+
+
+      // SUBMIT DEPOSIT TRANSACTION
+      const sendSlippage = BigNumber(100).minus(slippage).div(100)
+      const sendAmount0 = BigNumber(amount0).times(10**token0.decimals).toFixed(0)
+      const sendAmount1 = BigNumber(amount1).times(10**token1.decimals).toFixed(0)
+      const deadline = ''+moment().add(600, 'seconds').unix()
+      const sendAmount0Min = BigNumber(amount0).times(sendSlippage).times(10**token0.decimals).toFixed(0)
+      const sendAmount1Min = BigNumber(amount1).times(sendSlippage).times(10**token1.decimals).toFixed(0)
+
+
+      let func = 'addLiquidity'
+      let params = [token0.address, token1.address, isStable, sendAmount0, sendAmount1, sendAmount0Min, sendAmount1Min, account.address, deadline]
+      let sendValue = null
+
+      if(token0.address === 'ETH') {
+        func = 'addLiquidityETH'
+        params = [token1.address, isStable, sendAmount1, sendAmount1Min, sendAmount0Min, account.address, deadline]
+        sendValue = sendAmount0
+      }
+      if(token1.address === 'ETH') {
+        func = 'addLiquidityETH'
+        params = [token0.address, isStable, sendAmount0, sendAmount0Min, sendAmount1Min, account.address, deadline]
+        sendValue = sendAmount1
+      }
+
+      const routerContract = new web3.eth.Contract(CONTRACTS.ROUTER_ABI, CONTRACTS.ROUTER_ADDRESS)
+      this._callContractWait(web3, routerContract, func, params, account, gasPrice, null, null, depositTXID, async (err) => {
+        if (err) {
+          return this.emitter.emit(ACTIONS.ERROR, err)
+        }
+
+        // GET PAIR FOR NEWLY CREATED LIQUIDITY POOL
+        let tok0 = token0.address
+        let tok1 = token1.address
+        if(token0.address === 'ETH') {
+          tok0 = CONTRACTS.WETH_ADDRESS
+        }
+        if(token1.address === 'ETH') {
+          tok1 = CONTRACTS.WETH_ADDRESS
         }
         const pairFor = await factoryContract.methods.getPair(tok0, tok1, isStable).call()
 
@@ -1862,18 +2083,24 @@ class Store {
     }
   }
 
-  updatePairsCall = async (web3, account) => {
+  updatePairsCall = async (web3, account, pairAddress) => {
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API}/api/v1/updatePairs`, {
-        method: 'get',
-        headers: {
-          'Authorization': `Basic ${process.env.NEXT_PUBLIC_API_TOKEN}`,
-        }
-      })
-      const pairsCall = await response.json()
-      this.setStore({ pairs: pairsCall.data })
+      // const response = await fetch(`${process.env.NEXT_PUBLIC_API}/api/v1/updatePairs`, {
+      //   method: 'get',
+      //   headers: {
+      //     'Authorization': `Basic ${process.env.NEXT_PUBLIC_API_TOKEN}`,
+      //   }
+      // })
+      // const pairsCall = await response.json()
+      // this.setStore({ pairs: pairsCall.data })
 
-      await this._getPairInfo(web3, account, pairsCall.data)
+      // await this._getPairInfo(web3, account, pairsCall.data)
+
+      if (pairAddress) {
+        await this.getPairByAddress(pairAddress, true)
+      }
+
+      await this._getPairInfo(web3, account)
 
     } catch(ex) {
       console.log(ex)
@@ -1934,7 +2161,7 @@ class Store {
       let allowance1 = 0
 
       // CHECK ALLOWANCES AND SET TX DISPLAY
-      if(token0.address !== 'FTM') {
+      if(token0.address !== 'ETH') {
         allowance0 = await this._getDepositAllowance(web3, token0, account)
         if(BigNumber(allowance0).lt(amount0)) {
           this.emitter.emit(ACTIONS.TX_STATUS, {
@@ -1957,7 +2184,7 @@ class Store {
         })
       }
 
-      if(token1.address !== 'FTM') {
+      if(token1.address !== 'ETH') {
         allowance1 = await this._getDepositAllowance(web3, token1, account)
         if(BigNumber(allowance1).lt(amount1)) {
           this.emitter.emit(ACTIONS.TX_STATUS, {
@@ -2039,23 +2266,23 @@ class Store {
       let params = [token0.address, token1.address, pair.isStable, sendAmount0, sendAmount1, sendAmount0Min, sendAmount1Min, account.address, deadline]
       let sendValue = null
 
-      if(token0.address === 'FTM') {
-        func = 'addLiquidityFTM'
+      if(token0.address === 'ETH') {
+        func = 'addLiquidityETH'
         params = [token1.address, pair.isStable, sendAmount1, sendAmount1Min, sendAmount0Min, account.address, deadline]
         sendValue = sendAmount0
       }
-      if(token1.address === 'FTM') {
-        func = 'addLiquidityFTM'
+      if(token1.address === 'ETH') {
+        func = 'addLiquidityETH'
         params = [token0.address, pair.isStable, sendAmount0, sendAmount0Min, sendAmount1Min, account.address, deadline]
         sendValue = sendAmount1
       }
 
-      this._callContractWait(web3, routerContract, func, params, account, gasPrice, null, null, depositTXID, (err) => {
+      this._callContractWait(web3, routerContract, func, params, account, gasPrice, null, null, depositTXID, async (err) => {
         if (err) {
           return this.emitter.emit(ACTIONS.ERROR, err)
         }
 
-        this._getPairInfo(web3, account)
+        await this._getPairInfo(web3, account)
 
         this.emitter.emit(ACTIONS.LIQUIDITY_ADDED)
       }, null, sendValue)
@@ -2067,6 +2294,7 @@ class Store {
   }
 
   stakeLiquidity = async (payload) => {
+
     try {
       const context = this
 
@@ -2166,6 +2394,7 @@ class Store {
   }
 
   addLiquidityAndStake = async (payload) => {
+    console.log('add liquidity and stake payload', payload)
     try {
       const context = this
 
@@ -2223,7 +2452,7 @@ class Store {
       let allowance1 = 0
 
       // CHECK ALLOWANCES AND SET TX DISPLAY
-      if(token0.address !== 'FTM') {
+      if(token0.address !== 'ETH') {
         allowance0 = await this._getDepositAllowance(web3, token0, account)
         if(BigNumber(allowance0).lt(amount0)) {
           this.emitter.emit(ACTIONS.TX_STATUS, {
@@ -2246,7 +2475,7 @@ class Store {
         })
       }
 
-      if(token1.address !== 'FTM') {
+      if(token1.address !== 'ETH') {
         allowance1 = await this._getDepositAllowance(web3, token1, account)
         if(BigNumber(allowance1).lt(amount1)) {
           this.emitter.emit(ACTIONS.TX_STATUS, {
@@ -2363,13 +2592,13 @@ class Store {
       let params = [token0.address, token1.address, pair.isStable, sendAmount0, sendAmount1, sendAmount0Min, sendAmount1Min, account.address, deadline]
       let sendValue = null
 
-      if(token0.address === 'FTM') {
-        func = 'addLiquidityFTM'
+      if(token0.address === 'ETH') {
+        func = 'addLiquidityETH'
         params = [token1.address, pair.isStable, sendAmount1, sendAmount1Min, sendAmount0Min, account.address, deadline]
         sendValue = sendAmount0
       }
-      if(token1.address === 'FTM') {
-        func = 'addLiquidityFTM'
+      if(token1.address === 'ETH') {
+        func = 'addLiquidityETH'
         params = [token0.address, pair.isStable, sendAmount0, sendAmount0Min, sendAmount1Min, account.address, deadline]
         sendValue = sendAmount1
       }
@@ -2465,11 +2694,11 @@ class Store {
       let addy0 = token0.address
       let addy1 = token1.address
 
-      if(token0.address === 'FTM') {
-        addy0 = CONTRACTS.WFTM_ADDRESS
+      if(token0.address === 'ETH') {
+        addy0 = CONTRACTS.WETH_ADDRESS
       }
-      if(token1.address === 'FTM') {
-        addy1 = CONTRACTS.WFTM_ADDRESS
+      if(token1.address === 'ETH') {
+        addy1 = CONTRACTS.WETH_ADDRESS
       }
 
       const res = await routerContract.methods.quoteAddLiquidity(addy0, addy1, pair.isStable, sendAmount0, sendAmount1).call()
@@ -2852,7 +3081,16 @@ class Store {
 
       const sendWithdrawAmount = BigNumber(withdrawAmount).times(10**pair.decimals).toFixed(0)
 
-      const res = await routerContract.methods.quoteRemoveLiquidity(token0.address, token1.address, pair.isStable, sendWithdrawAmount).call()
+      let token0Addr = token0.address
+      let token1Addr = token1.address
+      if (token0Addr === 'ETH') {
+        token0Addr = CONTRACTS.WETH_ADDRESS
+      }
+      if (token1Addr === 'ETH') {
+        token1Addr = CONTRACTS.WETH_ADDRESS
+      }
+
+      const res = await routerContract.methods.quoteRemoveLiquidity(token0Addr, token1Addr, pair.isStable, sendWithdrawAmount).call()
 
       const returnVal = {
         inputs: {
@@ -2910,7 +3148,7 @@ class Store {
           return this.emitter.emit(ACTIONS.ERROR, err)
         }
 
-        await this.updatePairsCall(web3, account)
+        await this.updatePairsCall(web3, account, pair.address)
 
         this.emitter.emit(ACTIONS.CREATE_GAUGE_RETURNED)
       })
@@ -2929,7 +3167,7 @@ class Store {
         return null
       }
 
-      // some path logic. Have a base asset (FTM) swap from start asset to FTM, swap from FTM back to out asset. Don't know.
+      // some path logic. Have a base asset (ETH) swap from start asset to ETH, swap from ETH back to out asset. Don't know.
       const routeAssets = this.getStore('routeAssets')
       
       const { fromAsset, toAsset, fromAmount } = payload.content
@@ -2944,11 +3182,11 @@ class Store {
       let addy0 = fromAsset.address
       let addy1 = toAsset.address
 
-      if(fromAsset.address === 'FTM') {
-        addy0 = CONTRACTS.WFTM_ADDRESS
+      if(fromAsset.address === 'ETH') {
+        addy0 = CONTRACTS.WETH_ADDRESS
       }
-      if(toAsset.address === 'FTM') {
-        addy1 = CONTRACTS.WFTM_ADDRESS
+      if(toAsset.address === 'ETH') {
+        addy1 = CONTRACTS.WETH_ADDRESS
       }
 
       const includesRouteAddress = routeAssets.filter((asset) => {
@@ -3029,13 +3267,11 @@ class Store {
         }],
         routeAsset: null
       })
-
+      
       const multicall = await stores.accountStore.getMulticall()
       const receiveAmounts = await multicall.aggregate(amountOuts.map((route) => {
         return routerContract.methods.getAmountsOut(sendFromAmount, route.routes)
       }))
-
-      
 
       for(let i = 0; i < receiveAmounts.length; i++) {
         amountOuts[i].receiveAmounts = receiveAmounts[i]
@@ -3135,7 +3371,7 @@ class Store {
       let allowance = 0
 
       // CHECK ALLOWANCES AND SET TX DISPLAY
-      if(fromAsset.address !== 'FTM') {
+      if(fromAsset.address !== 'ETH') {
         allowance = await this._getSwapAllowance(web3, fromAsset, account)
 
         if(BigNumber(allowance).lt(fromAmount)) {
@@ -3197,13 +3433,13 @@ class Store {
       let params = [sendFromAmount, sendMinAmountOut, quote.output.routes, account.address, deadline]
       let sendValue = null
 
-      if(fromAsset.address === 'FTM') {
-        func = 'swapExactFTMForTokens'
+      if(fromAsset.address === 'ETH') {
+        func = 'swapExactETHForTokens'
         params = [sendMinAmountOut, quote.output.routes, account.address, deadline]
         sendValue = sendFromAmount
       }
-      if(toAsset.address === 'FTM') {
-        func = 'swapExactTokensForFTM'
+      if(toAsset.address === 'ETH') {
+        func = 'swapExactTokensForETH'
       }
 
       this._callContractWait(web3, routerContract, func, params, account, gasPrice, null, null, swapTXID, (err) => {
@@ -3235,7 +3471,7 @@ class Store {
       const ba = await Promise.all(
         baseAssets.map(async (asset) => {
           if(asset.address.toLowerCase() === assetAddress.toLowerCase()) {
-            if(asset.address === 'FTM') {
+            if(asset.address === 'ETH') {
               let bal = await web3.eth.getBalance(account.address)
               asset.balance = BigNumber(bal).div(10 ** asset.decimals).toFixed(asset.decimals)
             } else {
@@ -3673,10 +3909,12 @@ class Store {
         return BigNumber(vote.value).times(100).toFixed(0)
       })
 
-      this._callContractWait(web3, gaugesContract, 'vote', [tokenID, tokens, voteCounts], account, gasPrice, null, null, voteTXID, (err) => {
+      this._callContractWait(web3, gaugesContract, 'vote', [tokenID, tokens, voteCounts], account, gasPrice, null, null, voteTXID, async (err) => {
         if (err) {
           return this.emitter.emit(ACTIONS.ERROR, err)
         }
+
+        await this.getVestVotes({ content: { tokenID }})
 
         this.emitter.emit(ACTIONS.VOTE_RETURNED)
       })
@@ -4540,15 +4778,17 @@ class Store {
     //estimate gas
     this.emitter.emit(ACTIONS.TX_PENDING, { uuid })
 
+    const estimateGasParams = { from: account.address }
+    if (['addLiquidityETH'].includes(method)) {
+      estimateGasParams.value = sendValue
+    }
 
-    
-    
     const gasCost = contract.methods[method](...params)
-      .estimateGas({ from: account.address})
+      .estimateGas(estimateGasParams)
       .then((gasAmount) => {
         const context = this
 
-        console.log(gasAmount)
+        console.log('gasAmount', gasAmount)
 
         let sendGasAmount = BigNumber(gasAmount).times(1.5).toFixed(0)
         let sendGasPrice = BigNumber('140').times(1).toFixed(0)
@@ -4560,7 +4800,7 @@ class Store {
         // const sendGasAmount = '3000000'
         // const context = this
         //
-       
+
         contract.methods[method](...params).send({
             from: account.address,
             gasPrice: web3.utils.toWei(sendGasPrice, 'gwei'),

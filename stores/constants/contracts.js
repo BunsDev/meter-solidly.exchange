@@ -1,8 +1,8 @@
 import abis from "../abis";
 
 export const GOV_TOKEN_ADDRESS = '0xEb474B453d21E32Ad8914826962067B057299e1A'
-export const GOV_TOKEN_NAME = 'Solid'
-export const GOV_TOKEN_SYMBOL = 'SOLID'
+export const GOV_TOKEN_NAME = 'volt'
+export const GOV_TOKEN_SYMBOL = 'VOLT'
 export const GOV_TOKEN_DECIMALS = 18
 export const GOV_TOKEN_LOGO = 'https://prod.solidly.exchange/Solidly-O.svg'
 export const GOV_TOKEN_ABI = abis.tokenABI
@@ -14,17 +14,17 @@ export const VE_TOKEN_DECIMALS = 18
 export const VE_TOKEN_LOGO = 'https://prod.solidly.exchange/Solidly-O.svg'
 export const VE_TOKEN_ABI = abis.veTokenABI
 
-export const WFTM_ADDRESS = '0x27Ce41c3cb9AdB5Edb2d8bE253A1c6A64Db8c96d'
-export const WFTM_NAME = 'Wrapped Fantom'
-export const WFTM_SYMBOL = 'WFTM'
-export const WFTM_DECIMALS = 18
-export const WFTM_ABI = abis.wftmABI
+export const WETH_ADDRESS = '0x27Ce41c3cb9AdB5Edb2d8bE253A1c6A64Db8c96d'
+export const WETH_NAME = 'Wrapped Fantom'
+export const WETH_SYMBOL = 'WETH'
+export const WETH_DECIMALS = 18
+export const WETH_ABI = abis.wftmABI
 
-export const FTM_ADDRESS = 'MTR'
-export const FTM_NAME = 'Meter Stable'
-export const FTM_SYMBOL = 'MTR'
-export const FTM_DECIMALS = 18
-export const FTM_LOGO = 'https://assets.coingecko.com/coins/images/4001/large/Fantom.png'
+export const ETH_ADDRESS = 'MTR'
+export const ETH_NAME = 'Meter Stable'
+export const ETH_SYMBOL = 'MTR'
+export const ETH_DECIMALS = 18
+export const ETH_LOGO = 'https://assets.coingecko.com/coins/images/4001/large/Fantom.png'
 
 export const FACTORY_ADDRESS = '0xa36f84b86cEF6E3315EFee41ca14e33E7C7C31D2'
 export const FACTORY_ABI = abis.factoryABI
