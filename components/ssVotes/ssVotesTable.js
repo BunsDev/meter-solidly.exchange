@@ -333,6 +333,7 @@ const useStyles = makeStyles((theme) => ({
     top: '0px',
     border: '3px solid rgb(25, 33, 56)',
     borderRadius: '30px',
+    backgroundColor: '#FFF'
   },
   img2Logo: {
     position: 'absolute',
@@ -341,6 +342,7 @@ const useStyles = makeStyles((theme) => ({
     top: '0px',
     border: '3px solid rgb(25, 33, 56)',
     borderRadius: '30px',
+    backgroundColor: '#FFF'
   },
   inlineEnd: {
     display: 'flex',

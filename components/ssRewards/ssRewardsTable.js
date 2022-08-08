@@ -310,6 +310,7 @@ const useStyles = makeStyles((theme) => ({
     top: '0px',
     border: '3px solid rgb(25, 33, 56)',
     borderRadius: '30px',
+    backgroundColor: '#FFF'
   },
   img2Logo: {
     position: 'absolute',
@@ -318,6 +319,7 @@ const useStyles = makeStyles((theme) => ({
     top: '0px',
     border: '3px solid rgb(25, 33, 56)',
     borderRadius: '30px',
+    backgroundColor: '#FFF'
   },
   overrideTableHead: {
     borderBottom: '1px solid rgba(126,153,176,0.15) !important',
@@ -683,7 +685,7 @@ export default function EnhancedTable({ rewards, vestNFTs, tokenID }) {
                                 {formatCurrency(row.gauge.rewardsEarned)}
                               </Typography>
                               <Typography variant='h5' className={`${classes.textSpaced} ${classes.symbol}`} color='textSecondary'>
-                                SOLID
+                                VOLT
                               </Typography>
                             </div>
                           </>

@@ -339,7 +339,8 @@ const useStyles = makeStyles((theme) => ({
     top: '0px',
     border: '3px solid rgb(25, 33, 56)',
     borderRadius: '30px',
-    background: 'rgb(25, 33, 56)',
+    // background: 'rgb(25, 33, 56)',
+    backgroundColor: '#FFF'
   },
   img2Logo: {
     position: 'absolute',
@@ -348,7 +349,8 @@ const useStyles = makeStyles((theme) => ({
     top: '0px',
     border: '3px solid rgb(25, 33, 56)',
     borderRadius: '30px',
-    background: 'rgb(25, 33, 56)',
+    // background: 'rgb(25, 33, 56)',
+    backgroundColor: '#FFF'
   },
   overrideTableHead: {
     borderBottom: '1px solid rgba(126,153,176,0.15) !important',

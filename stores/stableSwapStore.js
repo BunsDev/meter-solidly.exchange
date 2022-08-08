@@ -928,20 +928,10 @@ class Store {
 
         pairs.push(thePair)
         this.setStore({ pairs: pairs })
-
+        this.emitter.emit(ACTIONS.UPDATED)
     }
-
- 
-   
-   
     
-  
-
-
-    
-
      return pairs;
-
   }
 
   _getGovTokenBase = () => {

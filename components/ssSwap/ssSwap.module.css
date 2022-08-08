@@ -82,7 +82,13 @@
 }
 
 .displayDualIconContainer {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border: 1px solid rgba(126, 153, 176, 0.2);
+  border-radius: 100%;
   width: 100px;
+  height: 100px;
   position: relative;
 }
 
@@ -93,7 +99,13 @@
 }
 
 .displayDualIconContainerSmall {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border: 1px solid rgba(126, 153, 176, 0.2);
+  border-radius: 100%;
   width: 60px;
+  height: 60px;
   position: relative;
   margin-right: 12px;
 }
@@ -136,18 +148,22 @@
 
 .displayAssetIcon {
   border: 1px solid rgba(126, 153, 176, 0.2);
-  border-radius: 50px;
-  background: rgb(33, 43, 72);
-  width: 100px;
-  height: 100px;
-  padding: 10px;
+  border-radius: 100%;
+  /* background: rgb(33, 43, 72); */
+  background: rgb(255, 255, 255);
+  width: 80px;
+  height: 80px;
+  /* padding: 10px; */
 }
 
 .displayAssetIconSmall {
   border: 1px solid rgba(126, 153, 176, 0.2);
-  border-radius: 30px;
-  background: rgb(33, 43, 72);
-  padding: 6px;
+  border-radius: 100%;
+  /* background: rgb(33, 43, 72); */
+  background: rgb(255, 255, 255);
+  width: 44px;
+  height: 44px;
+  /* padding: 6px; */
 }
 
 .displayChainIcon {
