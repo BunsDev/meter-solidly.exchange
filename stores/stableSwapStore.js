@@ -1783,7 +1783,6 @@ class Store {
 
       if(BigNumber(allowance1).lt(amount1)) {
         const tokenContract = new web3.eth.Contract(CONTRACTS.ERC20_ABI, token1.address)
-        console.log(token1.address,  CONTRACTS.ROUTER_ADDRESS, account)
         const tokenPromise = new Promise((resolve, reject) => {
           context._callContractWait(web3, tokenContract, 'approve', [CONTRACTS.ROUTER_ADDRESS, MAX_UINT256], account, gasPrice, null, null, allowance1TXID, (err) => {
             if (err) {
@@ -2850,7 +2849,17 @@ class Store {
 
       const routerContract = new web3.eth.Contract(CONTRACTS.ROUTER_ABI, CONTRACTS.ROUTER_ADDRESS)
 
-      const quoteRemove = await routerContract.methods.quoteRemoveLiquidity(token0.address, token1.address, pair.isStable, sendAmount).call()
+      let tok0 = token0.address
+      let tok1 = token1.address
+
+      if (tok0 === 'ETH') {
+        tok0 = CONTRACTS.WETH_ADDRESS
+      }
+      if (tok1 === 'ETH') {
+        tok1 = CONTRACTS.WETH_ADDRESS
+      }
+
+      const quoteRemove = await routerContract.methods.quoteRemoveLiquidity(tok0, tok1, pair.isStable, sendAmount).call()
 
       const sendSlippage = BigNumber(100).minus(slippage).div(100)
       const deadline = ''+moment().add(600, 'seconds').unix()
@@ -2858,12 +2867,13 @@ class Store {
       const sendAmount1Min = BigNumber(quoteRemove.amountB).times(sendSlippage).toFixed(0)
 
 
-      this._callContractWait(web3, routerContract, 'removeLiquidity', [token0.address, token1.address, pair.isStable, sendAmount, sendAmount0Min, sendAmount1Min, account.address, deadline], account, gasPrice, null, null, withdrawTXID, (err) => {
+      this._callContractWait(web3, routerContract, 'removeLiquidity', [tok0, tok1, pair.isStable, sendAmount, sendAmount0Min, sendAmount1Min, account.address, deadline], account, gasPrice, null, null, withdrawTXID, async (err) => {
         if (err) {
           return this.emitter.emit(ACTIONS.ERROR, err)
         }
 
-        this._getPairInfo(web3, account)
+        // this._getPairInfo(web3, account)
+        await context.updatePairsCall(web3, account, pair.address)
 
         this.emitter.emit(ACTIONS.LIQUIDITY_REMOVED)
       })
@@ -2975,14 +2985,24 @@ class Store {
           return this.emitter.emit(ACTIONS.ERROR, err)
         }
 
+        let tok0 = token0.address
+        let tok1 = token1.address
+
+        if (tok0 === 'ETH') {
+          tok0 = CONTRACTS.WETH_ADDRESS
+        }
+        if (tok1 === 'ETH') {
+          tok1 = CONTRACTS.WETH_ADDRESS
+        }
+
         const balanceOf = await pairContract.methods.balanceOf(account.address).call()
 
-        this._callContractWait(web3, routerContract, 'removeLiquidity', [token0.address, token1.address, pair.isStable, balanceOf, sendAmount0Min, sendAmount1Min, account.address, deadline], account, gasPrice, null, null, withdrawTXID, (err) => {
+        this._callContractWait(web3, routerContract, 'removeLiquidity', [tok0, tok1, pair.isStable, balanceOf, sendAmount0Min, sendAmount1Min, account.address, deadline], account, gasPrice, null, null, withdrawTXID, async (err) => {
           if (err) {
             return this.emitter.emit(ACTIONS.ERROR, err)
           }
 
-          this._getPairInfo(web3, account)
+          await this.updatePairsCall(web3, account, pair.address)
 
           this.emitter.emit(ACTIONS.REMOVE_LIQUIDITY_AND_UNSTAKED)
         })
@@ -3036,7 +3056,7 @@ class Store {
           return this.emitter.emit(ACTIONS.ERROR, err)
         }
 
-        this._getPairInfo(web3, account)
+        await this.updatePairsCall(web3, account, pair.address)
 
         this.emitter.emit(ACTIONS.LIQUIDITY_UNSTAKED)
       })
@@ -4772,6 +4792,20 @@ class Store {
     if (['addLiquidityETH'].includes(method)) {
       estimateGasParams.value = sendValue
     }
+
+    // if (['create_lock'].includes(method)) {
+    //   let sendGasPrice = BigNumber('140').times(1).toFixed(0)
+    //   contract.methods[method](...params).send({
+    //     from: account.address,
+    //     gasPrice: web3.utils.toWei(sendGasPrice, 'gwei'),
+    //     gas: 5000000,
+    //     value: sendValue,
+    //     // maxFeePerGas: web3.utils.toWei(gasPrice, "gwei"),
+    //     // maxPriorityFeePerGas: web3.utils.toWei("2", "gwei"),
+    //   })
+
+    //   return
+    // }
 
     const gasCost = contract.methods[method](...params)
       .estimateGas(estimateGasParams)

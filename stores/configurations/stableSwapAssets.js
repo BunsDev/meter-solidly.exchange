@@ -1,4 +1,13 @@
 // list of assets we support for providing liquidity to the factory. We will have to expand on this.
+import * as data from './solidly-tokens.json'
+const chainId = process.env.NEXT_PUBLIC_CHAINID
+const tokens = []
+for (const item of data.tokens) {
+  if (item.chainId == Number(chainId)) {
+    tokens.push(item)
+  }
+}
+// export default tokens
 export default [
   {
     address: 'ETH',

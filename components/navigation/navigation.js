@@ -207,7 +207,7 @@ function Navigation(props) {
   return (
     <div className={classes.navigationContainer}>
       <div className={classes.navigationHeading}>
-        <a onClick={() => router.push('/home')} className={classes.linkz}>
+        <a onClick={() => router.push('/')} className={classes.linkz}>
           <SiteLogo className={classes.appLogo} />
         </a>
       </div>
