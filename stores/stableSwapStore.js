@@ -320,7 +320,7 @@ class Store {
     }
   }
 
-  getPairByAddress = async (pairAddress, update) => {
+  getPairByAddress = async (pairAddress, flag) => {
     try {
       const web3 = await stores.accountStore.getWeb3Provider()
       if (!web3) {
@@ -338,7 +338,7 @@ class Store {
         return (pair.address.toLowerCase() == pairAddress.toLowerCase())
       })
 
-      if(!update && thePair.length > 0) {
+      if(!flag && thePair.length > 0) {
         const pc = new web3.eth.Contract(CONTRACTS.PAIR_ABI, pairAddress)
 
         const [ totalSupply, reserve0, reserve1, balanceOf ] = await Promise.all([
@@ -401,13 +401,15 @@ class Store {
           address: token0,
           symbol: token0Symbol,
           balance: BigNumber(token0Balance).div(10**token0Decimals).toFixed(parseInt(token0Decimals)),
-          decimals: parseInt(token0Decimals)
+          decimals: parseInt(token0Decimals),
+          logoURI: `https://raw.githubusercontent.com/meterio/token-list/master/data/${token0Symbol}/logo.png`
         },
         token1: {
           address: token1,
           symbol: token1Symbol,
           balance: BigNumber(token1Balance).div(10**token1Decimals).toFixed(parseInt(token1Decimals)),
-          decimals: parseInt(token1Decimals)
+          decimals: parseInt(token1Decimals),
+          logoURI: `https://raw.githubusercontent.com/meterio/token-list/master/data/${token1Symbol}/logo.png`
         },
         balance: BigNumber(balanceOf).div(10**decimals).toFixed(parseInt(decimals)),
         totalSupply: BigNumber(totalSupply).div(10**decimals).toFixed(parseInt(decimals)),
@@ -462,12 +464,13 @@ class Store {
         }
       }
 
-      if (update && thePair.length > 0) {
-        const index = pairs.findIndex(p => p.address.toLowerCase() == pairAddress.toLowerCase())
+      const index = pairs.findIndex(p => p.address.toLowerCase() == pairAddress.toLowerCase())
+      if (index !== -1) {
         pairs.splice(index, 1, thePair)
       } else {
         pairs.push(thePair)
       }
+
       this.setStore({ pairs: pairs })
       return thePair
     } catch(ex) {
@@ -570,13 +573,15 @@ class Store {
             address: token0,
             symbol: token0Symbol,
             balance: BigNumber(token0Balance).div(10**token0Decimals).toFixed(parseInt(token0Decimals)),
-            decimals: parseInt(token0Decimals)
+            decimals: parseInt(token0Decimals),
+            logoURI: `https://raw.githubusercontent.com/meterio/token-list/master/data/${token0Symbol}/logo.png`
           },
           token1: {
             address: token1,
             symbol: token1Symbol,
             balance: BigNumber(token1Balance).div(10**token1Decimals).toFixed(parseInt(token1Decimals)),
-            decimals: parseInt(token1Decimals)
+            decimals: parseInt(token1Decimals),
+            logoURI: `https://raw.githubusercontent.com/meterio/token-list/master/data/${token1Symbol}/logo.png`
           },
           balance: BigNumber(balanceOf).div(10**decimals).toFixed(parseInt(decimals)),
           totalSupply: BigNumber(totalSupply).div(10**decimals).toFixed(parseInt(decimals)),
@@ -1841,7 +1846,7 @@ class Store {
         }
         const pairFor = await factoryContract.methods.getPair(tok0, tok1, isStable).call()
 
-        await context.updatePairsCall(web3, account, pairFor)
+        await context.updatePairsCall(web3, account, pairFor, true)
 
         this.emitter.emit(ACTIONS.PAIR_CREATED, pairFor)
       }, null, sendValue)
@@ -2072,7 +2077,7 @@ class Store {
     }
   }
 
-  updatePairsCall = async (web3, account, pairAddress) => {
+  updatePairsCall = async (web3, account, pairAddress, flag) => {
     try {
       // const response = await fetch(`${process.env.NEXT_PUBLIC_API}/api/v1/updatePairs`, {
       //   method: 'get',
@@ -2086,7 +2091,7 @@ class Store {
       // await this._getPairInfo(web3, account, pairsCall.data)
 
       if (pairAddress) {
-        await this.getPairByAddress(pairAddress, true)
+        await this.getPairByAddress(pairAddress, flag)
       }
 
       await this._getPairInfo(web3, account)
@@ -2873,7 +2878,7 @@ class Store {
         }
 
         // this._getPairInfo(web3, account)
-        await context.updatePairsCall(web3, account, pair.address)
+        await context.updatePairsCall(web3, account)
 
         this.emitter.emit(ACTIONS.LIQUIDITY_REMOVED)
       })
@@ -3002,7 +3007,7 @@ class Store {
             return this.emitter.emit(ACTIONS.ERROR, err)
           }
 
-          await this.updatePairsCall(web3, account, pair.address)
+          await this.updatePairsCall(web3, account)
 
           this.emitter.emit(ACTIONS.REMOVE_LIQUIDITY_AND_UNSTAKED)
         })
@@ -3056,7 +3061,7 @@ class Store {
           return this.emitter.emit(ACTIONS.ERROR, err)
         }
 
-        await this.updatePairsCall(web3, account, pair.address)
+        await this.updatePairsCall(web3, account)
 
         this.emitter.emit(ACTIONS.LIQUIDITY_UNSTAKED)
       })
@@ -3158,7 +3163,7 @@ class Store {
           return this.emitter.emit(ACTIONS.ERROR, err)
         }
 
-        await this.updatePairsCall(web3, account, pair.address)
+        await this.updatePairsCall(web3, account, pair.address, true)
 
         this.emitter.emit(ACTIONS.CREATE_GAUGE_RETURNED)
       })
@@ -3181,6 +3186,7 @@ class Store {
       const routeAssets = this.getStore('routeAssets')
       
       const { fromAsset, toAsset, fromAmount } = payload.content
+      console.log({fromAsset, toAsset, fromAmount})
 
       const routerContract = new web3.eth.Contract(CONTRACTS.ROUTER_ABI, CONTRACTS.ROUTER_ADDRESS)
       const sendFromAmount = BigNumber(fromAmount).times(10**fromAsset.decimals).toFixed()
@@ -3202,6 +3208,8 @@ class Store {
       const includesRouteAddress = routeAssets.filter((asset) => {
         return (asset.address.toLowerCase() == addy0.toLowerCase() || asset.address.toLowerCase() == addy1.toLowerCase())
       })
+
+      console.log('includesRouteAddress', includesRouteAddress)
 
       let amountOuts = []
 
@@ -4793,7 +4801,7 @@ class Store {
       estimateGasParams.value = sendValue
     }
 
-    // if (['create_lock'].includes(method)) {
+    // if (['deposit'].includes(method)) {
     //   let sendGasPrice = BigNumber('140').times(1).toFixed(0)
     //   contract.methods[method](...params).send({
     //     from: account.address,

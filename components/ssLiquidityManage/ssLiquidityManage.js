@@ -69,7 +69,7 @@ export default function ssLiquidityManage() {
   const [ slippage, setSlippage ] = useState('2')
   const [ slippageError, setSlippageError ] = useState(false)
 
-  const ssUpdated = async (flag) => {
+  const ssUpdated = async () => {
     
 
     const storeAssetOptions = stores.stableSwapStore.getStore('baseAssets')
@@ -95,7 +95,8 @@ export default function ssLiquidityManage() {
     if(router.query.address && router.query.address !== 'create') {
       setPairReadOnly(true)
 
-      const pp = await stores.stableSwapStore.getPairByAddress(router.query.address, flag)
+      const pp = await stores.stableSwapStore.getPairByAddress(router.query.address)
+      console.log('pp', pp)
       setPair(pp)
 
       if(pp) {
@@ -150,7 +151,7 @@ export default function ssLiquidityManage() {
 
     const createGaugeReturned = () => {
       setCreateLoading(false)
-      ssUpdated(true)
+      ssUpdated()
     }
 
     const errorReturned = () => {

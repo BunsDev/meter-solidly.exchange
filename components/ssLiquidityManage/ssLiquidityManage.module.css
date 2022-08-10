@@ -142,7 +142,8 @@
 .inputBalanceText {
   font-weight: 100 !important;
   font-size: 12px !important;
-  color: #7e99b0;
+  /* color: #7e99b0; */
+  color: #c7d5e1;
   margin-right: 6px !important;
   margin-top: 6px !important;
 }

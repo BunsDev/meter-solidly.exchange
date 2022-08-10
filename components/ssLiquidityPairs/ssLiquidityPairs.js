@@ -20,7 +20,7 @@ export default function ssLiquidityPairs() {
       setPairs(stores.stableSwapStore.getStore('pairs'))
       forceUpdate()
     }
-
+    
     setPairs(stores.stableSwapStore.getStore('pairs'))
 
     stores.emitter.on(ACTIONS.UPDATED, stableSwapUpdated);
