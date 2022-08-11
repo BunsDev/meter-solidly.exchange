@@ -336,9 +336,11 @@
 
 .displayAssetIconSmall {
   border: 1px solid rgba(128, 128, 128, 0.5);
-  border-radius: 30px;
-  background: rgb(33, 43, 72);
-  padding: 6px;
+  border-radius: 100%;
+  /* background: rgb(33, 43, 72); */
+  background-color: #FFF;
+  width: 48px;
+  height: 48px;
 }
 
 .displaySelectContainer {
@@ -347,7 +349,13 @@
 }
 
 .displayDualIconContainer {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border: 1px solid rgba(128, 128, 128, 0.5);
+  border-radius: 100%;
   width: 100px;
+  height: 100px;
   position: relative;
 }
 
@@ -358,18 +366,24 @@
 }
 
 .displayDualIconContainerSmall {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border: 1px solid rgba(128, 128, 128, 0.5);
+  border-radius: 100%;
   width: 60px;
+  height: 60px;
   position: relative;
   margin-right: 12px;
 }
 
 .displayAssetIcon {
   border: 1px solid rgba(128, 128, 128, 0.5);
-  border-radius: 50px;
-  background: rgb(33, 43, 72);
-  width: 100px;
-  height: 100px;
-  padding: 10px;
+  border-radius: 100%;
+  /* background: rgb(33, 43, 72); */
+  background-color: #FFF;
+  width: 80px;
+  height: 80px;
 }
 
 .someIcon {
@@ -381,6 +395,7 @@
   top: 10px;
   border: 5px solid #212b48;
   border-radius: 100px;
+  background-color: #FFF;
 }
 .img2Logo {
   position: absolute;
@@ -389,6 +404,7 @@
   top: 10px;
   border: 5px solid #212b48;
   border-radius: 100px;
+  background-color: #FFF;
 }
 .doubleImages {
   display: flex;

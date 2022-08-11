@@ -4,7 +4,7 @@ import { useRouter } from 'next/router';
 import { Typography, Paper, Switch, Button, Tooltip, Grid, SvgIcon, Link} from '@material-ui/core';
 import { ToggleButton, ToggleButtonGroup } from '@material-ui/lab';
 import { withTheme, withStyles } from '@material-ui/core/styles';
-import { INFO_URL } from '../../stores/constants/constants';
+import { INFO_URL, LEGACY_URL } from '../../stores/constants/constants';
 import SSWarning  from '../ssWarning';
 
 import stores from '../../stores';
@@ -169,7 +169,8 @@ function Navigation(props) {
           'Whitelist',
           'whitelist',
         )}
-         {renderExternalLink('Info', 'info')}
+        {renderExternalLink('Info', INFO_URL)}
+        {renderExternalLink('Legacy', LEGACY_URL)}
       </ToggleButtonGroup>
     );
   };
@@ -188,7 +189,7 @@ function Navigation(props) {
   const renderExternalLink = (title, link) => {
     return (
       <ToggleButton  className={ classes.navButton } classes={{ selected: classes.testChange }}>
-        <Link href={INFO_URL} style={{color:"#7E99B0", textDecoration:"none"}} rel="noopener noreferrer" target="_blank"  > <Typography variant="h2" className={ classes.subtitleText}>{title}</Typography></Link>
+        <Link href={link} style={{color:"#7E99B0", textDecoration:"none"}} rel="noopener noreferrer" target="_blank"  > <Typography variant="h2" className={ classes.subtitleText}>{title}</Typography></Link>
        
       </ToggleButton>
     );

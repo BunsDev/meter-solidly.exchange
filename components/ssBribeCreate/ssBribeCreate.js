@@ -376,7 +376,6 @@ function AssetSelect({ type, value, assetOptions, onSelect }) {
               className={ classes.displayAssetIconSmall }
               alt=""
               src={ asset ? `${asset.logoURI}` : asset && value.symbol.toUpperCase() === 'VOLT' ? MTRG_LOGO : '' }
-              height='60px'
               onError={(e)=>{e.target.onerror = null; e.target.src="/tokens/unknown-logo.png"}}
             />
           </div>
@@ -486,7 +485,6 @@ function AssetSelect({ type, value, assetOptions, onSelect }) {
               className={ classes.displayAssetIcon }
               alt=""
               src={ value ? `${value.logoURI}` : value && value.symbol.toUpperCase() === 'VOLT' ? MTRG_LOGO : '' }
-              height='100px'
               onError={(e)=>{e.target.onerror = null; e.target.src="/tokens/unknown-logo.png"}}
             />
           </div>

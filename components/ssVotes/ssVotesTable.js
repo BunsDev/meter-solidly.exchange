@@ -550,6 +550,7 @@ export default function EnhancedTable({ gauges, setParentSliderValues, defaultVo
                           <div className={ classes.inlineEnd }>
                             <Typography variant="h2" className={classes.textSpaced}>{ formatCurrency(bribe.rewardAmount) }</Typography>
                             <Typography variant="h5" className={classes.textSpaced} color='textSecondary'>{ bribe.token.symbol }</Typography>
+                            <Typography variant="h5" className={classes.textSpaced} color='textSecondary'>{ `(${(bribe.rewardRate * 100).toFixed(2)}%)` }</Typography>
                           </div>
                         )
                       })

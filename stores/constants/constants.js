@@ -9,14 +9,18 @@ let isTestnet = process.env.NEXT_PUBLIC_CHAINID == 83
 let scan = 'https://scan.meter.io/'
 let cont = contracts
 
+let infoUrl = ''
+
 if(isTestnet) {
   scan = 'https://scan-warringstakes.meter.io/'
   cont = contractsTestnet
+  infoUrl = 'http://voltswapv2info.surge.sh/'
 }
 
 export const MTRG_LOGO = 'https://raw.githubusercontent.com/meterio/token-list/master/data/MTRG/logo.png'
 
-export const INFO_URL = 'http://metersolidlyinfo.surge.sh'
+export const INFO_URL = infoUrl
+export const LEGACY_URL = 'https://voltswap.finance/'
 
 export const ETHERSCAN_URL = scan
 

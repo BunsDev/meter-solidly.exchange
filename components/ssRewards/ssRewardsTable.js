@@ -302,7 +302,8 @@ const useStyles = makeStyles((theme) => ({
   },
   imgLogo: {
     border: '3px solid rgb(25, 33, 56)',
-    borderRadius: '30px',
+    borderRadius: '100%',
+    backgroundColor: '#FFF'
   },
   img1Logo: {
     position: 'absolute',

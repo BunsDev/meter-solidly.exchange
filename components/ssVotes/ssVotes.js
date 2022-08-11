@@ -164,12 +164,12 @@ export default function ssVotes() {
       <div className={ classes.topBarContainer }>
 
         <Grid container spacing={1}>
-          <Grid item lg='auto' lg='auto' sm={12} xs={12}>
-            {/*
+          <Grid item lg='auto' sm={12} xs={12}>
+            
               <Button
                 variant="contained"
-                color="secondary"
-                className={classes.button}
+                // color="secondary"
+                // className={classes.button}
                 startIcon={<AddCircleOutlineIcon />}
                 size='large'
                 className={ classes.buttonOverride }
@@ -178,7 +178,7 @@ export default function ssVotes() {
               >
                 <Typography className={ classes.actionButtonText }>{ `Create Bribe` }</Typography>
               </Button>
-            */}
+           
           </Grid>
           <Grid item lg={true} md={true} sm={12} xs={12}>
             <TextField
@@ -197,7 +197,7 @@ export default function ssVotes() {
               }}
             />
           </Grid>
-          <Grid item lg='auto' lg='auto' sm={12} xs={12}>
+          <Grid item lg='auto' sm={12} xs={12}>
             <div className={ classes.tokenIDContainer }>
               { renderMediumInput(token, vestNFTs) }
             </div>

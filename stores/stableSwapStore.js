@@ -871,13 +871,15 @@ class Store {
             address: token0,
             symbol: token0Symbol,
             balance: BigNumber(token0Balance).div(10**token0Decimals).toFixed(parseInt(token0Decimals)),
-            decimals: parseInt(token0Decimals)
+            decimals: parseInt(token0Decimals),
+            logoURI: `https://raw.githubusercontent.com/meterio/token-list/master/data/${token0Symbol}/logo.png`
           },
           token1: {
             address: token1,
             symbol: token1Symbol,
             balance: BigNumber(token1Balance).div(10**token1Decimals).toFixed(parseInt(token1Decimals)),
-            decimals: parseInt(token1Decimals)
+            decimals: parseInt(token1Decimals),
+            logoURI: `https://raw.githubusercontent.com/meterio/token-list/master/data/${token1Symbol}/logo.png`
           },
           balance: BigNumber(balanceOf).div(10**decimals).toFixed(parseInt(decimals)),
           totalSupply: BigNumber(totalSupply).div(10**decimals).toFixed(parseInt(decimals)),
@@ -4019,6 +4021,8 @@ class Store {
 
       const { asset, amount, gauge } = payload.content
 
+      console.log({asset, amount, gauge})
+
       // ADD TRNASCTIONS TO TRANSACTION QUEUE DISPLAY
       let allowanceTXID = this.getTXUUID()
       let bribeTXID = this.getTXUUID()
@@ -4087,7 +4091,7 @@ class Store {
           return this.emitter.emit(ACTIONS.ERROR, err)
         }
 
-        await this.updatePairsCall(web3, account)
+        await this.updatePairsCall(web3, account, gauge.address)
 
         this.emitter.emit(ACTIONS.BRIBE_CREATED)
       })
@@ -4823,7 +4827,7 @@ class Store {
         console.log('gasAmount', gasAmount)
 
         let sendGasAmount = BigNumber(gasAmount).times(1.5).toFixed(0)
-        let sendGasPrice = BigNumber('140').times(1).toFixed(0)
+        let sendGasPrice = BigNumber('500').times(1).toFixed(0)
         //let sendGasPrice = BigNumber(gasPrice).times(1.5).toFixed(0)
         // if (paddGasCost) {
         //   sendGasAmount = BigNumber(sendGasAmount).times(1.15).toFixed(0)
