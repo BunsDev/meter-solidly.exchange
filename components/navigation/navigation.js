@@ -209,7 +209,8 @@ function Navigation(props) {
     <div className={classes.navigationContainer}>
       <div className={classes.navigationHeading}>
         <a onClick={() => router.push('/')} className={classes.linkz}>
-          <SiteLogo className={classes.appLogo} />
+          {/* <SiteLogo className={classes.appLogo} /> */}
+          <img className={classes.imgLogo} src="/Voltswap_Logo.png"/>
         </a>
       </div>
 

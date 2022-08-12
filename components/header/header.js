@@ -244,7 +244,7 @@ function Header(props) {
 
         <div style={{ width: '260px', display: 'flex', justifyContent: 'flex-end' }}>
 
-          { process.env.NEXT_PUBLIC_CHAINID == '4002' &&
+          { process.env.NEXT_PUBLIC_CHAINID == '83' &&
             <div className={ classes.testnetDisclaimer}>
               <Typography className={ classes.testnetDisclaimerText}>Testnet</Typography>
             </div>
