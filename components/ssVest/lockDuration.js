@@ -48,7 +48,6 @@ export default function ffLockDuration({ nft, updateLockDuration }) {
   }, [ nft ])
 
   const handleDateChange = (event) => {
-    setSelectedDate(event.target.value);
     setSelectedValue(null);
 
     updateLockDuration(event.target.value)
@@ -61,7 +60,7 @@ export default function ffLockDuration({ nft, updateLockDuration }) {
     let days = 0;
     switch (event.target.value) {
       case 'week':
-        days = 8;
+        days = 7;
         break;
       case 'month':
         days = 30;
@@ -70,7 +69,7 @@ export default function ffLockDuration({ nft, updateLockDuration }) {
         days = 365;
         break;
       case 'years':
-        days = 1461;
+        days = 1460;
         break;
       default:
     }
